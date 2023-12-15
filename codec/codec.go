@@ -5,15 +5,16 @@ import (
 	"encoding/gob"
 )
 
+// Codec 编码解码器
 type Codec interface {
 	Encode(i interface{}) ([]byte, error)
 	Decode(data []byte, i interface{}) error
 }
 
-type CobCodec struct{}
+type GobCodec struct{}
 
 // Encode 编码
-func (c CobCodec) Encode(i interface{}) ([]byte, error) {
+func (c GobCodec) Encode(i interface{}) ([]byte, error) {
 	var buffer bytes.Buffer
 
 	encoder := gob.NewEncoder(&buffer)
@@ -25,7 +26,7 @@ func (c CobCodec) Encode(i interface{}) ([]byte, error) {
 }
 
 // Decode 解码
-func (c CobCodec) Decode(data []byte, i interface{}) error {
+func (c GobCodec) Decode(data []byte, i interface{}) error {
 	buffer := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(buffer)
 
