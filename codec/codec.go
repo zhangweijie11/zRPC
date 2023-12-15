@@ -3,6 +3,7 @@ package codec
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 )
 
 // Codec 编码解码器
@@ -31,4 +32,15 @@ func (c GobCodec) Decode(data []byte, i interface{}) error {
 	decoder := gob.NewDecoder(buffer)
 
 	return decoder.Decode(i)
+}
+
+type JSONCodec struct{}
+
+func (c JSONCodec) Encode(i interface{}) ([]byte, error) {
+	return json.Marshal(i)
+}
+
+func (c JSONCodec) Decode(data []byte, i interface{}) error {
+	decode := json.NewDecoder(bytes.NewBuffer(data))
+	return decode.Decode(i)
 }

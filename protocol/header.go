@@ -38,11 +38,11 @@ const (
 	Gzip
 )
 
-type SerializerType byte
+type SerializeType byte
 
 const (
 	// 序列化类型
-	Gob SerializerType = iota
+	Gob SerializeType = iota
 	JSON
 )
 
@@ -72,14 +72,14 @@ func (h *Header) CompressType() CompressType {
 	return CompressType(h[3])
 }
 
-func (h *Header) SerCompressType(compressType CompressType) {
+func (h *Header) SetCompressType(compressType CompressType) {
 	h[3] = byte(compressType)
 }
 
-func (h *Header) SerializeType() SerializerType {
-	return SerializerType(h[4])
+func (h *Header) SerializeType() SerializeType {
+	return SerializeType(h[4])
 }
 
-func (h *Header) SetSerializeType(serializerType SerializerType) {
+func (h *Header) SetSerializeType(serializerType SerializeType) {
 	h[4] = byte(serializerType)
 }
