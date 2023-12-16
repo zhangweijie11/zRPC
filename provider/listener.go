@@ -16,6 +16,7 @@ type Listener interface {
 	Close()
 }
 
+// RPCListener RPC 服务监听器
 type RPCListener struct {
 	ServiceIP   string
 	ServicePort int
@@ -23,6 +24,7 @@ type RPCListener struct {
 	netListener net.Listener
 }
 
+// NewRPCListener 初始化监听器
 func NewRPCListener(serviceIP string, servicePort int) *RPCListener {
 	return &RPCListener{
 		ServiceIP:   serviceIP,
@@ -32,10 +34,11 @@ func NewRPCListener(serviceIP string, servicePort int) *RPCListener {
 	}
 }
 
+// Run 启动监听器
 func (rl *RPCListener) Run() {
 	addr := fmt.Sprintf("%s:%d", rl.ServiceIP, rl.ServicePort)
 
-	netListener, err := net.Listen(config.TRANS_TYPE, addr)
+	netListener, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
 	}
@@ -50,12 +53,14 @@ func (rl *RPCListener) Run() {
 	}
 }
 
+// Close 关闭监听器
 func (rl *RPCListener) Close() {
 	if rl.netListener != nil {
 		rl.netListener.Close()
 	}
 }
 
+// SetHandler 设置处理器
 func (rl *RPCListener) SetHandler(name string, handler Handler) {
 	if _, ok := rl.Handlers[name]; ok {
 		log.Printf("%s 已经注册！", name)
@@ -65,6 +70,7 @@ func (rl *RPCListener) SetHandler(name string, handler Handler) {
 	rl.Handlers[name] = handler
 }
 
+// CloseConn 关闭服务链接
 func (rl *RPCListener) CloseConn(conn net.Conn) {
 	//activeconn
 	conn.Close()
@@ -73,6 +79,7 @@ func (rl *RPCListener) CloseConn(conn net.Conn) {
 	log.Println("服务关闭！")
 }
 
+// 处理服务链接
 func (rl *RPCListener) handleConn(conn net.Conn) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -111,6 +118,7 @@ func (rl *RPCListener) handleConn(conn net.Conn) {
 	}
 }
 
+// 接收数据
 func (rl *RPCListener) receiveData(conn net.Conn) (*protocol.RPCMsg, error) {
 	msg, err := protocol.Read(conn)
 	if err != nil {
@@ -121,6 +129,7 @@ func (rl *RPCListener) receiveData(conn net.Conn) (*protocol.RPCMsg, error) {
 	return msg, nil
 }
 
+// 发送数据
 func (rl *RPCListener) sendData(conn net.Conn, payload []byte) error {
 	resMsg := protocol.NewRPCMsg()
 	resMsg.SetVersion(config.Protocol_MsgVersion)

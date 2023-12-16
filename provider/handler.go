@@ -6,11 +6,13 @@ type Handler interface {
 	Handle(string, []interface{}) ([]interface{}, error)
 }
 
+// RPCServerHandler RPC 服务处理器
 type RPCServerHandler struct {
 	rpcServer *RPCServer
 	class     reflect.Value
 }
 
+// Handle 处理器
 func (handler *RPCServerHandler) Handle(method string, params []interface{}) ([]interface{}, error) {
 	args := make([]reflect.Value, len(params))
 	for i := range args {
