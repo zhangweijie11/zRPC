@@ -16,6 +16,7 @@ func main() {
 	rpcServer := provider.NewRPCServer(ip, port)
 	rpcServer.RegisterName("User", &global.UserHandler{})
 	rpcServer.RegisterName("Test", &global.TestHandler{})
+	// 可以在 RPC 传输中序列化和反序列化数据
 	gob.Register(global.User{})
 
 	go rpcServer.Run()

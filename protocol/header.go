@@ -11,9 +11,6 @@ RPC 消息格式编码设计：
 每个占 1 个字节（8 个 bit）。可扩展追加消息 ID 以及元数据等信息用于服务治理
 */
 
-// 消息类型
-type MsgType byte
-
 const (
 	// 消息头长度
 	HeaderLen = 5
@@ -24,8 +21,11 @@ const (
 	magicNumber byte = 0x06
 )
 
+// 消息类型
+type MsgType byte
+
 const (
-	// 协议版本
+	// 消息类型
 	Request MsgType = iota
 	Response
 )

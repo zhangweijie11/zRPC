@@ -72,11 +72,11 @@ func (cli *RPCClient) Close() {
 // 通过反射生成代理函数，在代理函数中完成网络连接、请求数据序列化、网络传输、响应返回数据解析等工作
 func (cli *RPCClient) makeCall(service *Service, methodPtr interface{}) {
 	container := reflect.ValueOf(methodPtr).Elem()
-	// 针对不同序列化协议的编解码器
+	// 针对不同序列化协议的编解码器，默认为 GOB 协议
 	coder := global.Codecs[cli.option.SerializeType]
 
 	handler := func(req []reflect.Value) []reflect.Value {
-		// 函数的输出参数计数
+		// 函数类型的返回值数量
 		numOut := container.Type().NumOut()
 		errorHandler := func(err error) []reflect.Value {
 			outArgs := make([]reflect.Value, numOut)
@@ -131,6 +131,7 @@ func (cli *RPCClient) makeCall(service *Service, methodPtr interface{}) {
 		outArgs := make([]reflect.Value, numOut)
 		for i := 0; i < numOut; i++ {
 			if i != numOut {
+				// 如果没有解码到值，设置为与函数返回类型对应位置相同类型的零值
 				if respDecode[i] == nil {
 					outArgs[i] = reflect.Zero(container.Type().Out(i))
 				} else {
@@ -143,21 +144,24 @@ func (cli *RPCClient) makeCall(service *Service, methodPtr interface{}) {
 
 		return outArgs
 	}
+	// 利用反射机制，根据制定的函数类型信息以及处理函数 handler，动态创建一个函数，
+	// 并将这个新创建的函数设置到 container 对应的位置，覆盖原始的函数值或指针，实现动态生成的函数替换
 	container.Set(reflect.MakeFunc(container.Type(), handler))
 }
 
 // 执行实际函数调用
-func (cli RPCClient) wrapCall(ctx context.Context, stub interface{}, params ...interface{}) (interface{}, error) {
+func (cli *RPCClient) wrapCall(ctx context.Context, stub interface{}, params ...interface{}) (interface{}, error) {
 	f := reflect.ValueOf(stub).Elem()
+	// 判断参数的数量和函数定义的输入参数数量是否相同
 	if len(params) != f.Type().NumIn() {
-		return nil, errors.New(fmt.Sprintf("参数无法使用：%d-%d", len(params), f.Type().NumIn()))
+		return nil, errors.New(fmt.Sprintf("参数数量不一致：%d-%d", len(params), f.Type().NumIn()))
 	}
 
-	in := make([]reflect.Value, len(params))
+	inArgs := make([]reflect.Value, len(params))
 	for idx, param := range params {
-		in[idx] = reflect.ValueOf(param)
+		inArgs[idx] = reflect.ValueOf(param)
 	}
-	result := f.Call(in)
+	result := f.Call(inArgs)
 
 	return result, nil
 }

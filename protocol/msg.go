@@ -26,7 +26,7 @@ func NewRPCMsg() *RPCMsg {
 	return &RPCMsg{Header: &header}
 }
 
-// Send 发送数据
+// Send 发送数据，数据格式为：协议头，总体长度，类名长度，类名，方法名长度，方法，参数长度，参数
 func (msg *RPCMsg) Send(writer io.Writer) error {
 	// 写入协议头
 	_, err := writer.Write(msg.Header[:])
@@ -76,6 +76,7 @@ func (msg *RPCMsg) Send(writer io.Writer) error {
 	return err
 }
 
+// Decode 解码
 func (msg *RPCMsg) Decode(r io.Reader) error {
 	// 读取协议头
 	_, err := io.ReadFull(r, msg.Header[:])

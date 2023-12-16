@@ -9,7 +9,7 @@ type RPCClientProxy struct {
 	option Option
 }
 
-func (cp RPCClientProxy) Call(ctx context.Context, servicePath string, stub interface{}, params ...interface{}) (interface{}, error) {
+func (cp *RPCClientProxy) Call(ctx context.Context, servicePath string, stub interface{}, params ...interface{}) (interface{}, error) {
 	service, err := NewService(servicePath)
 	if err != nil {
 		return nil, err

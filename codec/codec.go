@@ -14,8 +14,8 @@ type Codec interface {
 
 type GobCodec struct{}
 
-// Encode 编码
-func (c GobCodec) Encode(i interface{}) ([]byte, error) {
+// Encode 编码，针对 GOB 协议
+func (c *GobCodec) Encode(i interface{}) ([]byte, error) {
 	var buffer bytes.Buffer
 
 	encoder := gob.NewEncoder(&buffer)
@@ -26,8 +26,8 @@ func (c GobCodec) Encode(i interface{}) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// Decode 解码
-func (c GobCodec) Decode(data []byte, i interface{}) error {
+// Decode 解码，针对 GOB 协议
+func (c *GobCodec) Decode(data []byte, i interface{}) error {
 	buffer := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(buffer)
 
@@ -36,11 +36,13 @@ func (c GobCodec) Decode(data []byte, i interface{}) error {
 
 type JSONCodec struct{}
 
-func (c JSONCodec) Encode(i interface{}) ([]byte, error) {
+// Encode 编码，针对 JSON 协议
+func (c *JSONCodec) Encode(i interface{}) ([]byte, error) {
 	return json.Marshal(i)
 }
 
-func (c JSONCodec) Decode(data []byte, i interface{}) error {
+// Decode 解码，针对 JSON 协议
+func (c *JSONCodec) Decode(data []byte, i interface{}) error {
 	decode := json.NewDecoder(bytes.NewBuffer(data))
 	return decode.Decode(i)
 }
