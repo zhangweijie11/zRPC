@@ -11,9 +11,9 @@ var Codecs = map[protocol.SerializeType]codec.Codec{
 	protocol.Gob:  &codec.GobCodec{},
 }
 
-type TestHandler struct{}
+type HelloHandler struct{}
 
-func (h *TestHandler) Hello() string {
+func (h *HelloHandler) Hello() string {
 	return "hello world"
 }
 
