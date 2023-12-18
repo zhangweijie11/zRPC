@@ -22,15 +22,25 @@ type Client interface {
 type Option struct {
 	Retries           int                    // 重试次数
 	ConnectionTimeout time.Duration          // 超时时间
+	ReadTimeout       time.Duration          // 超时时间
+	WriteTimeout      time.Duration          // 超时时间
 	SerializeType     protocol.SerializeType // 序列化协议
 	CompressType      protocol.CompressType  // 压缩类型
+	NetProtocol       string
+	FailMode          FailMode
+	LoadBalanceMode   LoadBalanceMode
 }
 
 var DefaultOption = Option{
 	Retries:           3,
 	ConnectionTimeout: 5 * time.Second,
+	ReadTimeout:       3 * time.Second,
+	WriteTimeout:      3 * time.Second,
 	SerializeType:     protocol.Gob,
 	CompressType:      protocol.None,
+	NetProtocol:       "tcp",
+	FailMode:          Failover,
+	LoadBalanceMode:   RoundRobinBalance,
 }
 
 type RPCClient struct {

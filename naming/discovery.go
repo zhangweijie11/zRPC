@@ -322,6 +322,7 @@ func (dis *Discovery) Register(ctx context.Context, instance *Instance) (context
 					dis.register(instance)
 				}
 			case <-ctx.Done():
+				// 服务注销
 				dis.cancel(instance)
 				ch <- struct{}{}
 			}
@@ -373,4 +374,9 @@ func (dis *Discovery) Fetch(ctx context.Context, appId string) ([]*Instance, boo
 		dis.mutex.Unlock()
 	}
 	return result, ok
+}
+
+func (dis *Discovery) Close() error {
+	//TODO: close myself
+	return nil
 }
