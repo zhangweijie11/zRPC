@@ -17,6 +17,8 @@ type Client interface {
 	Connect(string) error
 	Invoke(context.Context, *Service, interface{}, ...interface{}) (interface{}, error)
 	Close()
+	MakeFunc(*Service, interface{})
+	GetAddr() string
 }
 
 type Option struct {
@@ -46,6 +48,7 @@ var DefaultOption = Option{
 type RPCClient struct {
 	conn   net.Conn
 	option Option
+	addr   string
 }
 
 // NewClient 初始化客户端
@@ -55,19 +58,20 @@ func NewClient(option Option) *RPCClient {
 
 // Connect 连接客户端
 func (cli *RPCClient) Connect(addr string) error {
-	conn, err := net.DialTimeout("tcp", addr, cli.option.ConnectionTimeout)
+	conn, err := net.DialTimeout(cli.option.NetProtocol, addr, cli.option.ConnectionTimeout)
 	if err != nil {
 		return err
 	}
 
 	cli.conn = conn
+	cli.addr = addr
 
 	return nil
 }
 
 // Invoke 执行
 func (cli *RPCClient) Invoke(ctx context.Context, service *Service, stub interface{}, params ...interface{}) (interface{}, error) {
-	cli.makeCall(service, stub)
+	cli.MakeFunc(service, stub)
 
 	return cli.wrapCall(ctx, stub, params...)
 }
@@ -79,8 +83,8 @@ func (cli *RPCClient) Close() {
 	}
 }
 
-// 通过反射生成代理函数，在代理函数中完成网络连接、请求数据序列化、网络传输、响应返回数据解析等工作
-func (cli *RPCClient) makeCall(service *Service, methodPtr interface{}) {
+// MakeFunc 通过反射生成代理函数，在代理函数中完成网络连接、请求数据序列化、网络传输、响应返回数据解析等工作
+func (cli *RPCClient) MakeFunc(service *Service, methodPtr interface{}) {
 	container := reflect.ValueOf(methodPtr).Elem()
 	// 针对不同序列化协议的编解码器，默认为 GOB 协议
 	coder := global.Codecs[cli.option.SerializeType]
@@ -174,4 +178,9 @@ func (cli *RPCClient) wrapCall(ctx context.Context, stub interface{}, params ...
 	result := f.Call(inArgs)
 
 	return result, nil
+}
+
+func (cli *RPCClient) GetAddr() string {
+	//cli.conn.RemoteAddr().String()
+	return cli.addr
 }

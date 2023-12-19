@@ -36,6 +36,7 @@ func newRandomBalance(servers []string) LoadBalance {
 	return &randomBalance{servers: servers}
 }
 
+// Get 随机负载均衡
 func (b *randomBalance) Get() string {
 	rand.Seed(time.Now().Unix())
 	return b.servers[rand.Intn(len(b.servers))]
@@ -50,6 +51,7 @@ func newRoundRobinBalance(servers []string) LoadBalance {
 	return &roundRobinBalance{servers: servers, curIdx: 0}
 }
 
+// Get 轮询负载均衡
 func (b *roundRobinBalance) Get() string {
 	lens := len(b.servers)
 	if b.curIdx >= lens {
